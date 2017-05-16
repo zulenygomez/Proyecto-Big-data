@@ -89,4 +89,63 @@ ggplot(desercion, aes(factor(deserto)))+geom_bar()
 
 #Genero semilla
 set.seed(123)
-#
+
+##construyo un vector de 1500 numeros aleatorios, de la secuencia de numeros enteros de 1 a 1904
+
+train_sample <- sample(1904, 1500)
+
+#Me voy a quedar con las filas de la base de datos  que corresponden a estos 1500 numeros aleatorios, y esta sera la base de entrenamiento
+
+#base de entrenamiento:
+desercion_train <- desercion[train_sample, ]
+
+#inspeccionar base de entrenamiento
+
+str(desercion_train ) #es un data frame, que tiene  1500 observaciones y 16 variables
+
+#base de prueba
+
+desercion_test <- desercion[-train_sample, ]
+
+#las filas que no corresponde a los 1500 numeros aleatorios,perteneceran a mi base de prueba
+
+#tabla de proporcion para la base de entrenamiento
+
+prop.table(table(desercion_train$deserto))
+
+#tabla de proporcion para la base de prueba
+
+prop.table(table(desercion_test$deserto)) 
+
+
+
+#En teoria las bases de entrenamiento y de prueba deberian arrojar aproximadamente las mismas proporciones de personas que desertaron y que no desertaron.
+# Esto se evidencia cuando hago la tabla de proporciones, pues en  la base de datos de entrenamiento me dice que el 53.53% de las personas no desertaron y el 46.46%
+#si lo hicieron y la base de datos de prueba me dice que el 56.93% de los estudiantes no lo hicieron, mientras que un 43.06% si
+#Resultaron proporciones que no se alejaron mucho unas de otros
+
+#comparando con la base de datos original
+
+prop.table(table(desercion$deserto))
+
+#Y Comparando con la base de datos original, hay una aproximacion muy cercana de las observaciones catalogadas como deserteroas o no comparando con la base
+#De datos de prueba y de entrenamiento, ya que mi base de datos original me dice que el 54.52% de las personas no desertaron y el 45.74% si 
+
+
+#------------------------Implementar algoritmo---------------------------#
+
+install.packages("randomForest")
+library(randomForest)
+
+#Para correr el modelo debo extaer la columna 6 ya que esta tiene nuestro outcome de interes
+
+        
+desercion_rf <- randomForest(desercion_train[-6], desercion_train$deserto, importance=TRUE)
+desercion_rf
+
+plot(desercion_rf, main="Errors Rate")
+arImpPlot(desercion_rf, sort = TRUE, main="Variables Importance",type=2, n.var=10)
+
+desercion_pred_rf <- predict(desecion_rf, desercion_test)
+CrossTable(desercion_test$deserto, desercion_pred_rf, prop.chisq=FALSE, prop.c=FALSE, prop.r=FALSE, dnn=c("real", 'pronostico'))
+
